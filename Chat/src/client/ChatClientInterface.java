@@ -2,8 +2,11 @@ package client;
 
 import java.rmi.*;
 
-public interface ChatClientInterface {
+import common.Message;
+
+public interface ChatClientInterface extends Remote {
+	
 	public String getName() throws RemoteException;
 
-	public void send(String msg) throws RemoteException;	
+	public void send(Message msg) throws RemoteException;	
 }
