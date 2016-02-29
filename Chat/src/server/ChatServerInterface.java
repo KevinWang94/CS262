@@ -18,10 +18,10 @@ public interface ChatServerInterface extends Remote {
 	public List<String> listActiveAccounts() throws RemoteException;
 	public List<String> listActiveAccounts(String pattern) throws RemoteException;
 	public void newGroup(String name) throws RemoteException;
-	public void addMember(Group g, String user) throws RemoteException;
-	public List<Group> listGroups() throws RemoteException;
-	public List<Group> listGroups(String pattern) throws RemoteException;
-	public void sendMessage(int sender, Message m, Group g) throws RemoteException;
+	public void addMember(String gname, String user) throws RemoteException;
+	public List<String> listGroups() throws RemoteException;
+	public List<String> listGroups(String pattern) throws RemoteException;
+	public void sendGroupMessage(int sender, Message m, String gname) throws RemoteException;
 	public void sendMessage(int sender, Message m, String user) throws RemoteException;
 	public List<Message> getUndelivered(int sender) throws RemoteException;
 }

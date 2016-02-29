@@ -1,6 +1,7 @@
 package common;
 
 public class Account {
+	
 	public String username;
 	public String password;
 	public long id;

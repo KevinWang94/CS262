@@ -10,7 +10,7 @@ public class Group {
 	
 	public Group(String name) {
 		this.name = name;
-		this.members = new HashSet<String> ();
+		this.members = new HashSet<String>();
 	}
 	
 	public void addMember(String member) {
