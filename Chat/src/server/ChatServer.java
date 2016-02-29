@@ -147,6 +147,19 @@ public class ChatServer implements ChatServerInterface {
 
 	}
 	
+	@Override
+	public void sendGroupMessage(int sender, Message m, String gname) throws RemoteException {
+		Group g = this.groups.get(gname);
+		if(g != null) {
+			for(String user : g.members) {
+				sendMessage(sender, m, user);
+			}
+		} else {
+			// TODO: exception?
+		}
+		
+	}
+	
 	/**
 	 * Get the undelivered messages for a user
 	 * 
@@ -214,11 +227,4 @@ public class ChatServer implements ChatServerInterface {
 		// TODO Auto-generated method stub
 		return "Hello, world!";
 	}
-
-	@Override
-	public void sendGroupMessage(int sender, Message m, String gname) throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
