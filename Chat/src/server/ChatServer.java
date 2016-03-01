@@ -18,6 +18,7 @@ public class ChatServer implements ChatServerInterface {
 	private Map<String, Account> users;
 	private Map<Integer, String> sessionIDs;
 	private Map<String, Group> groups;
+	private Map<String, String> hosts;
 //	private Map<String, ChatClientInterface> activeUsers;
 	private Map<String, List<Message>> undelivered;
 
@@ -29,6 +30,7 @@ public class ChatServer implements ChatServerInterface {
     	this.sessionIDs = new HashMap<Integer, String>();
     	this.groups = new HashMap<String, Group>();
     	this.undelivered = new HashMap<String, List<Message>>();
+    	this.hosts = new HashMap<String, String>();
     }
 
     /**
@@ -41,13 +43,14 @@ public class ChatServer implements ChatServerInterface {
      * @return SessionID integer, -1 if username already exists
      */
 	public int createAccount(String username,
-			String password) {
+			String password, String host) {
 		if (users.containsKey(username)) {
 			return -1;
 		}
 		Account newAcct = new Account(username, password);
 		this.users.put(username, newAcct);
-		return signIn(username, password);
+		this.hosts.put(username, host);
+		return signIn(username, password, host);
 	}
 
 	/**
@@ -58,7 +61,7 @@ public class ChatServer implements ChatServerInterface {
 	 * 
 	 * @return SessionID integer, -1 if account doesn't exist or password is not correct
 	 */
-	public int signIn(String username, String password) {
+	public int signIn(String username, String password, String host) {
 		Account acct = users.get(username);
 		if (acct == null || !acct.password.equals(password)) {
 			return -1;
@@ -71,6 +74,7 @@ public class ChatServer implements ChatServerInterface {
 
 		// Register this SessionID
 		this.sessionIDs.put(sessionID, username);
+		this.hosts.put(username, host);
 
 		return sessionID;
 	}
