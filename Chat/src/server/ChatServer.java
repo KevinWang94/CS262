@@ -118,7 +118,11 @@ public class ChatServer implements ChatServerInterface {
 
 	}
 
-	public void sendMessage(int sender, Message m, String user) {
+	public void sendMessage(int sender, Message m, String user) throws RemoteException {
+		if (users.get(user) == null) {
+			throw new RemoteException("User does not exist.");
+		}
+
 		try {
 			Registry registry = LocateRegistry.getRegistry();
 			ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(user);
@@ -126,11 +130,11 @@ public class ChatServer implements ChatServerInterface {
 		} catch (RemoteException e) {
 			System.out.println("Remove exception trying to send message to: " + user);
 			if(this.undelivered.get(user) != null) {
+				this.undelivered.get(user).add(m);
+			} else {
 				List<Message> messages = new ArrayList<Message>();
 				messages.add(m);
 				this.undelivered.put(user, messages);
-			} else {
-				this.undelivered.get(user).add(m);
 			}
 		} catch (NotBoundException e) {
 			if(this.undelivered.get(user) != null) {
