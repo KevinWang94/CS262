@@ -22,21 +22,18 @@ public class ChatClient implements ChatClientInterface {
 		this.scanner = new Scanner(System.in);		
 	}
 	
-	@Override
 	public String getName() throws RemoteException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public void send(Message msg) throws RemoteException {
-		System.out.println("testtest");
 		System.out.println(msg.getText());
 		// TODO Auto-generated method stub
 
 	}
 	
-	private void loop(ChatServerInterface serverStub) throws RemoteException {
+	private boolean loopOnce(ChatServerInterface serverStub) throws RemoteException {
 		System.out.println("Which command? Enter 'help' for command list, 'q' to Quit");
 		String input = scanner.nextLine();
 		switch (input) {
@@ -53,7 +50,7 @@ public class ChatClient implements ChatClientInterface {
 			for(String acct : accts) {
 				System.out.println(acct);
 			}
-			break;
+			return true;
 		}
 		case "LG": {
 			System.out.println("If you want to use a pattern please input now, otherwise hit enter");
@@ -68,7 +65,7 @@ public class ChatClient implements ChatClientInterface {
 			for(String group : groups) {
 				System.out.println(group);
 			}
-			break;
+			return true;
 		}
 		case "SM": {
 			System.out.println("Message text:");
@@ -88,13 +85,13 @@ public class ChatClient implements ChatClientInterface {
 			} else {
 				System.out.println("Invalid choice");
 			}
-			break;
+			return true;
 		}
 		case "CG": {
 			System.out.println("Group Name:");
 			String gname = scanner.nextLine();
 			serverStub.newGroup(gname);
-			break;
+			return true;
 		}
 		case "AG": {
 			System.out.println("Group Name:");
@@ -105,7 +102,7 @@ public class ChatClient implements ChatClientInterface {
 			for(String username : usernames) {
 				serverStub.addMember(gname, username);
 			}
-			break;
+			return true;
 		}
 		case "D": {
 			List<Message> messages = serverStub.getUndelivered(this.sessionID);
@@ -113,24 +110,41 @@ public class ChatClient implements ChatClientInterface {
 				System.out.println("Blah");
 				System.out.println(m.getText());
 			}
-			break;
+			return true;
 		}
 		case "DA": {
 			serverStub.deleteAccount(this.sessionID);
 			this.sessionID = -1;
 			this.username = null;
 			System.out.println("Your account has been deleted");
-			break;
+			return true;
 		}
 		case "help": {
 			System.out.println("HELP TEXT HERE");
-			break;
+			return true;
+		}
+		case "q": {
+			System.out.println("quitting");
+			return false;
 		}
 		default:
 			System.out.println("Invalid input please try again");
+			return true;
 		}
 	}
 
+	private void loop(ChatServerInterface serverStub) {
+		boolean keepGoing = true;
+		while(keepGoing) {
+			try {
+				keepGoing = loopOnce(serverStub);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception. Unable to contact server. Restart and try again");
+			}
+		}
+	}
+
+	
 	private void initial(ChatServerInterface serverStub) throws RemoteException {
 		System.out.println("Type N for new account or L for login");
 		String input = scanner.nextLine();
