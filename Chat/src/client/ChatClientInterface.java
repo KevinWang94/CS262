@@ -9,4 +9,6 @@ public interface ChatClientInterface extends Remote {
 	public String getName() throws RemoteException;
 
 	public void send(Message msg) throws RemoteException;	
+	
+	public void signOut(String message) throws RemoteException;
 }

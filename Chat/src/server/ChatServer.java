@@ -73,6 +73,20 @@ public class ChatServer implements ChatServerInterface {
 		} while (sessionIDs.containsKey(sessionID));
 
 		// Register this SessionID
+		
+		if (this.hosts.containsKey(username)) {
+			Registry registry;
+			try {
+				registry = LocateRegistry.getRegistry();
+				ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(username);
+				clientStub.signOut("This account has signed in on another machine.");	
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+			} catch (NotBoundException e) {
+				// TODO Auto-generated catch block
+			}
+		}
+		
 		this.sessionIDs.put(sessionID, username);
 		this.hosts.put(username, host);
 

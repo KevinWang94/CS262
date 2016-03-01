@@ -145,14 +145,8 @@ public class ChatClient implements ChatClientInterface {
 				this.username = username;
 				this.sessionID = sessionID;
 				ChatClientInterface clientStub = (ChatClientInterface) UnicastRemoteObject.exportObject(this, 0);
-				// Bind the remote object's stub in the registry
-				try {
-					Registry registry = LocateRegistry.getRegistry();
-					registry.bind(username, clientStub);
-				} catch (AlreadyBoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				Registry registry = LocateRegistry.getRegistry();
+				registry.rebind(username, clientStub);
 			} else {
 				System.out.println("Username is already taken, please try again");
 				initial(serverStub, clientHost);
@@ -169,14 +163,8 @@ public class ChatClient implements ChatClientInterface {
 				this.sessionID = sessionID;
 				this.username = username;
 				ChatClientInterface clientStub = (ChatClientInterface) UnicastRemoteObject.exportObject(this, 0);
-				// Bind the remote object's stub in the registry
-				try {
-					Registry registry = LocateRegistry.getRegistry();
-					registry.bind(username, clientStub);
-				} catch (AlreadyBoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				Registry registry = LocateRegistry.getRegistry();
+				registry.rebind(username, clientStub);
 			} else {
 				System.out.println("Issue signing in, please try again");
 				initial(serverStub, clientHost);
@@ -187,6 +175,10 @@ public class ChatClient implements ChatClientInterface {
 			System.out.println("Invalid choice please try again");
 		}
 
+	}
+	
+	public void signOut(String message) {
+		System.out.println(message);
 	}
 	public static void main(String[] args) {
 		System.out.println(args[0]);
