@@ -1,6 +1,8 @@
 package client;
 
 import java.util.List;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -8,7 +10,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
 import common.Message;
-
 import server.ChatServer;
 import server.ChatServerInterface;
 
@@ -18,9 +19,8 @@ public class ChatClient implements ChatClientInterface {
 	private int sessionID;
 	private String username;
 
-	public ChatClient(String username, String password) {
-		this.scanner = new Scanner(System.in);
-		
+	public ChatClient() {
+		this.scanner = new Scanner(System.in);		
 	}
 	
 	@Override
@@ -80,11 +80,12 @@ public class ChatClient implements ChatClientInterface {
 			if(choice.equals("G")) {
 				System.out.println("Group name:");
 				String gname = scanner.nextLine();
+				m.setGroup(gname);
 				serverStub.sendGroupMessage(this.sessionID, m, gname);
 			} else if(choice.equals("I")) {
 				System.out.println("Username of recipient:");
-				String username = scanner.nextLine();
-				serverStub.sendMessage(this.sessionID, m, username);
+				String recipient = scanner.nextLine();
+				serverStub.sendMessage(this.sessionID, m, recipient);
 			} else {
 				System.out.println("Invalid choice");
 			}
@@ -140,10 +141,19 @@ public class ChatClient implements ChatClientInterface {
 			String username = scanner.nextLine();
 			System.out.println("New password:");
 			String password = scanner.nextLine();
-			int sessionID = serverStub.createAccount(this, username, password);
+			int sessionID = serverStub.createAccount(username, password);
 			if(sessionID > 0) {
 				this.username = username;
 				this.sessionID = sessionID;
+				ChatClientInterface clientStub = (ChatClientInterface) UnicastRemoteObject.exportObject(this, 0);
+				// Bind the remote object's stub in the registry
+				try {
+					Registry registry = LocateRegistry.getRegistry();
+					registry.bind(username, clientStub);
+				} catch (AlreadyBoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
 				System.out.println("Username is already taken, please try again");
 				initial(serverStub);
@@ -159,6 +169,15 @@ public class ChatClient implements ChatClientInterface {
 			if(sessionID > 0) {
 				this.sessionID = sessionID;
 				this.username = username;
+				ChatClientInterface clientStub = (ChatClientInterface) UnicastRemoteObject.exportObject(this, 0);
+				// Bind the remote object's stub in the registry
+				try {
+					Registry registry = LocateRegistry.getRegistry();
+					registry.bind(username, clientStub);
+				} catch (AlreadyBoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
 				System.out.println("Issue signing in, please try again");
 				initial(serverStub);
@@ -171,25 +190,30 @@ public class ChatClient implements ChatClientInterface {
 
 	}
 	public static void main(String[] args) {
-
 		try {
-			String username = "test";
-			String password = "test";
-			ChatClient client = new ChatClient(username, password);
-			ChatClientInterface clientStub = (ChatClientInterface) UnicastRemoteObject.exportObject(client, 0);
-			// Bind the remote object's stub in the registry
 			Registry registry = LocateRegistry.getRegistry();
-			registry.bind("test", clientStub);
-
-			String host = (args.length < 1) ? null : args[0];
-
 			ChatServerInterface serverStub = (ChatServerInterface) registry.lookup("Server");
-			int response = serverStub.createAccount(client, username, password);
-			serverStub.sendMessage(response, new Message("", "hi"), "test");
-			System.out.println("response: " + response);
-		} catch (Exception e) {
-			System.err.println("Client exception: " + e.toString());
+			ChatClient client = new ChatClient();
+			client.initial(serverStub);
+			client.loop(serverStub);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+//		try {
+//
+//			String host = (args.length < 1) ? null : args[0];
+//
+//			int response = serverStub.createAccount(client, username, password);
+//			serverStub.sendMessage(response, new Message("", "hi"), "test");
+//			System.out.println("response: " + response);
+//		} catch (Exception e) {
+//			System.err.println("Client exception: " + e.toString());
+//			e.printStackTrace();
+//		}
 	}
 }

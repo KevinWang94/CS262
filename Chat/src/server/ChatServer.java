@@ -44,7 +44,7 @@ public class ChatServer implements ChatServerInterface {
      * 
      * @return SessionID integer, -1 if username already exists
      */
-	public int createAccount(ChatClientInterface client, String username,
+	public int createAccount(String username,
 			String password) {
 		if (users.containsKey(username)) {
 			return -1;
@@ -123,13 +123,9 @@ public class ChatServer implements ChatServerInterface {
 	}
 
 	public void sendMessage(int sender, Message m, String user) {
-		System.out.println("sending message");
-		String name = sessionIDs.get(sender);
-		System.out.println(name);
 		try {
 			Registry registry = LocateRegistry.getRegistry();
-			ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(name);
-			System.out.println("sending message try/catch");
+			ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(user);
 			clientStub.send(m);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block

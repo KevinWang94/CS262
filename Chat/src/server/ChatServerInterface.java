@@ -10,7 +10,7 @@ import common.*;
 public interface ChatServerInterface extends Remote {
 
 	public String sayHello() throws RemoteException;
-	public int createAccount(ChatClientInterface client, String username, String password) throws RemoteException;
+	public int createAccount(String username, String password) throws RemoteException;
 	public void deleteAccount(int sender) throws RemoteException;
 	public int signIn(String username, String password) throws RemoteException;
 	public List<String> listAccounts() throws RemoteException;
