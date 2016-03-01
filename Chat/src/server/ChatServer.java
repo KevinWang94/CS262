@@ -135,15 +135,15 @@ public class ChatServer implements ChatServerInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if(this.undelivered.get(user) != null) {
+				List<Message> messages = new ArrayList<Message>();
+				messages.add(m);
+				this.undelivered.put(user, messages);
+			} else {
+				this.undelivered.get(user).add(m);
+			}
+			
 		}
-
-		// if(this.onlineUsers.contains(user) {
-		//
-		// } else {
-		//
-		// }
 
 	}
 	
