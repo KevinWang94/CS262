@@ -9,7 +9,6 @@ import java.util.Scanner;
 
 import common.Message;
 
-import server.ChatServer;
 import server.ChatServerInterface;
 
 public class ChatClient implements ChatClientInterface {

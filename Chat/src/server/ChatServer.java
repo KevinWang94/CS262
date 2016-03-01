@@ -5,13 +5,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.Collection;
 import java.util.HashMap;
 
 import client.ChatClientInterface;
@@ -132,8 +128,14 @@ public class ChatServer implements ChatServerInterface {
 			System.out.println("sending message try/catch");
 			clientStub.send(m);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Remove exception trying to send message to: " + user);
+			if(this.undelivered.get(user) != null) {
+				List<Message> messages = new ArrayList<Message>();
+				messages.add(m);
+				this.undelivered.put(user, messages);
+			} else {
+				this.undelivered.get(user).add(m);
+			}
 		} catch (NotBoundException e) {
 			if(this.undelivered.get(user) != null) {
 				List<Message> messages = new ArrayList<Message>();
