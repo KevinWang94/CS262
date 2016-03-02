@@ -171,11 +171,11 @@ public class ChatServer implements ChatServerInterface {
 		Group g = this.groups.get(gname);
 		if(g != null) {
 			for(String user : g.members) {
-				if (!gname.equals(sessionIDs.get(sender)))
+				if (!user.equals(sessionIDs.get(sender)))
 					sendMessage(sender, m, user);
 			}
 		} else {
-			// TODO: exception?
+			throw new ServerException("Group does not exist.");
 		}
 		
 	}

@@ -80,7 +80,7 @@ public class ChatClient implements ChatClientInterface {
 			if(pattern.length() > 0) {
 				groups = serverStub.listGroups(pattern);
 			} else {
-				groups = serverStub.listGroups(pattern);
+				groups = serverStub.listGroups();
 			}
 			System.out.println("Here are all the groups you requested:");
 			for(String group : groups) {
@@ -128,7 +128,7 @@ public class ChatClient implements ChatClientInterface {
 		}
 		case "D": {
 			List<Message> messages = serverStub.getUndelivered(this.sessionID);
-			System.out.println("Here are your undelievered messages:");
+			System.out.println("Here are your undelivered messages:");
 			if (messages != null) {
 				for(Message m : messages) {
 					System.out.println(stringOfMessage(m));
