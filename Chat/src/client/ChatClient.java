@@ -3,6 +3,7 @@ package client;
 import java.util.List;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.ServerException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -40,7 +41,9 @@ public class ChatClient implements ChatClientInterface {
 	 * @param msg the message to be send
 	 */
 	public void send(Message msg) throws RemoteException {
+		System.out.println();
 		System.out.println(stringOfMessage(msg));
+		System.out.print(">");
 	}
 	
 	/**
@@ -51,11 +54,11 @@ public class ChatClient implements ChatClientInterface {
 	 * @throws RemoteException
 	 */
 	private boolean loopOnce(ChatServerInterface serverStub) throws RemoteException {
-		System.out.println("Which command? Enter 'help' for command list, 'q' to Quit");
+		printPrompt("Which command? Enter 'help' for command list, 'q' to Quit");
 		String input = scanner.nextLine();
 		switch (input) {
 		case "LA": {
-			System.out.println("If you want to use a pattern please input now, otherwise hit enter");
+			printPrompt("If you want to use a pattern please input now, otherwise hit enter");
 			String pattern = scanner.nextLine();
 			List<String> accts;
 			if(pattern.length() > 0) {
@@ -71,7 +74,7 @@ public class ChatClient implements ChatClientInterface {
 			return true;
 		}
 		case "LG": {
-			System.out.println("If you want to use a pattern please input now, otherwise hit enter");
+			printPrompt("If you want to use a pattern please input now, otherwise hit enter");
 			String pattern = scanner.nextLine();
 			List<String> groups;
 			if(pattern.length() > 0) {
@@ -87,35 +90,35 @@ public class ChatClient implements ChatClientInterface {
 			return true;
 		}
 		case "SM": {
-			System.out.println("Message text:");
+			printPrompt("Message text:");
 			String message = scanner.nextLine();
 			Message m = new Message(this.username, message);
-			System.out.println("(G)roup or (I)ndividual message?");
+			printPrompt("(G)roup or (I)ndividual message?");
 			String choice = scanner.nextLine();
 			if(choice.equals("G")) {
-				System.out.println("Group name:");
+				printPrompt("Group name:");
 				String gname = scanner.nextLine();
 				m.setGroup(gname);
 				serverStub.sendGroupMessage(this.sessionID, m, gname);
 			} else if(choice.equals("I")) {
-				System.out.println("Username of recipient:");
+				printPrompt("Username of recipient:");
 				String recipient = scanner.nextLine();
 				serverStub.sendMessage(this.sessionID, m, recipient);
 			} else {
-				System.out.println("Invalid choice");
+				printError("Invalid choice");
 			}
 			return true;
 		}
 		case "CG": {
-			System.out.println("Group Name:");
+			printPrompt("Group Name:");
 			String gname = scanner.nextLine();
 			serverStub.newGroup(gname);
 			return true;
 		}
 		case "AG": {
-			System.out.println("Group Name:");
+			printPrompt("Group Name:");
 			String gname = scanner.nextLine();
-			System.out.println("Comma separated usernames (no spaces)");
+			printPrompt("Comma separated usernames (no spaces)");
 			String usernamesString = scanner.nextLine();
 			String[] usernames = usernamesString.split(",");
 			for(String username : usernames) {
@@ -147,11 +150,11 @@ public class ChatClient implements ChatClientInterface {
 			return true;
 		}
 		case "q": {
-			System.out.println("quitting");
+			System.out.println("Quitting");
 			return false;
 		}
 		default:
-			System.out.println("Invalid input please try again");
+			printError("Invalid input please try again");
 			return true;
 		}
 	}
@@ -164,12 +167,23 @@ public class ChatClient implements ChatClientInterface {
 		while(keepGoing) {
 			try {
 				keepGoing = loopOnce(serverStub);
+			} catch(ServerException e) {
+				printError(e.getLocalizedMessage());
 			} catch (RemoteException e) {
-				System.out.println("Remote exception. Unable to contact server. Restart and try again");
+				printError("Remote exception. Unable to contact server. Restart and try again");
 				return 1;
 			}
 		}
 		return 0;
+	}
+	
+	private void printPrompt(String message) {
+		System.out.println(message);
+		System.out.print(">");
+	}
+	
+	private void printError(String message) {
+		System.out.println("Error: " + message);
 	}
 	
 	/**
@@ -178,13 +192,13 @@ public class ChatClient implements ChatClientInterface {
 	 * @throws RemoteException
 	 */
 	private void initial(ChatServerInterface serverStub, String clientHost) throws RemoteException {
-		System.out.println("Type N for new account or L for login");
+		printPrompt("Type N for new account or L for login");
 		String input = scanner.nextLine();
 		switch(input) {
 		case "N": {
-			System.out.println("New username:");
+			printPrompt("New username:");
 			String username = scanner.nextLine();
-			System.out.println("New password:");
+			printPrompt("New password:");
 			String password = scanner.nextLine();
 
 			int sessionID = serverStub.createAccount(username, password, clientHost);
@@ -195,15 +209,15 @@ public class ChatClient implements ChatClientInterface {
 				Registry clientRegistry = LocateRegistry.getRegistry();
 				clientRegistry.rebind(username, clientStub);
 			} else {
-				System.out.println("Username is already taken, please try again");
+				printError("Username is already taken, please try again");
 				initial(serverStub, clientHost);
 			}
 			break;
 		}
 		case "L": {
-			System.out.println("Username:");
+			printPrompt("Username:");
 			String username = scanner.nextLine();
-			System.out.println("Password:");
+			printPrompt("Password:");
 			String password = scanner.nextLine();
 
 			int sessionID = serverStub.signIn(username, password, clientHost);
@@ -214,13 +228,14 @@ public class ChatClient implements ChatClientInterface {
 				Registry clientRegistry = LocateRegistry.getRegistry();
 				clientRegistry.rebind(username, clientStub);
 			} else {
-				System.out.println("Issue signing in, please try again");
+				printError("Issue signing in, please try again");
 				initial(serverStub, clientHost);
 			}
 			break;
 		}
 		default:
-			System.out.println("Invalid choice please try again");
+			printError("Invalid choice please try again");
+			initial(serverStub, clientHost);
 		}
 	}
 	
@@ -242,5 +257,7 @@ public class ChatClient implements ChatClientInterface {
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
+		System.exit(0);
+		return;
 	}
 }

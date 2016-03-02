@@ -100,7 +100,6 @@ public class ChatServer implements ChatServerInterface {
 		this.sessionIDs.remove(sender);
 		this.users.remove(username);
 		this.undelivered.remove(username);
-		
 	}
 	
 	public List<String> listAccounts() {
@@ -136,8 +135,11 @@ public class ChatServer implements ChatServerInterface {
 	}
 
 	public void sendMessage(int sender, Message m, String user) throws RemoteException {
+		if (sessionIDs.get(sender).equals(user)) {
+			throw new ServerException("Sending message to self.");
+		}
 		if (users.get(user) == null) {
-			throw new RemoteException("User does not exist.");
+			throw new ServerException("User does not exist.");
 		}
 
 		String host = hosts.get(user);
@@ -169,7 +171,8 @@ public class ChatServer implements ChatServerInterface {
 		Group g = this.groups.get(gname);
 		if(g != null) {
 			for(String user : g.members) {
-				sendMessage(sender, m, user);
+				if (!gname.equals(sessionIDs.get(sender)))
+					sendMessage(sender, m, user);
 			}
 		} else {
 			// TODO: exception?
