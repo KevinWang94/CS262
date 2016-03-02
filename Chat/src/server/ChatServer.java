@@ -32,6 +32,13 @@ public class ChatServer implements ChatServerInterface {
     	this.hosts = new HashMap<String, String>();
     }
 
+	public void validateSession(int sender) throws FailException {
+		if (!sessionIDs.containsKey(sender)) {
+			throw new FailException("Invalid session ID");
+		}
+	}
+	
+
     /**
      * Create an account
      * 
@@ -94,19 +101,23 @@ public class ChatServer implements ChatServerInterface {
 	 * Delete an account while logged in
 	 * 
 	 * @param SessionID (this makes sure only you can delete your own account)
+	 * @throws FailException 
 	 */
-	public void deleteAccount(int sender) {
+	public void deleteAccount(int sender) throws FailException {
+		validateSession(sender);
 		String username = this.sessionIDs.get(sender);
 		this.sessionIDs.remove(sender);
 		this.users.remove(username);
 		this.undelivered.remove(username);
 	}
 	
-	public List<String> listAccounts() {
+	public List<String> listAccounts(int sender) throws FailException {
+		validateSession(sender);
 		return new ArrayList<String>(users.keySet());
 	}
 
-	public List<String> listAccounts(String pattern) {
+	public List<String> listAccounts(int sender, String pattern) throws FailException {
+		validateSession(sender);
 		ArrayList<String> accts = new ArrayList<String>();
 		for(String a : users.keySet()) {
 			if(a.matches(pattern)) {
@@ -116,12 +127,14 @@ public class ChatServer implements ChatServerInterface {
 		return accts;
 	}
 
-	public void newGroup(String gname) {
+	public void newGroup(int sender, String gname) throws FailException {
+		validateSession(sender);
 		Group g = new Group(gname);
 		this.groups.put(gname, g);
 	}
 
-	public void addMember(String gname, String user) throws ServerException {
+	public void addMember(int sender, String gname, String user) throws ServerException, FailException {
+		validateSession(sender);
 		if(this.groups.containsKey(gname)) {
 			if(this.users.containsKey(user)) {
 				this.groups.get(gname).addMember(user);
@@ -135,6 +148,7 @@ public class ChatServer implements ChatServerInterface {
 	}
 
 	public void sendMessage(int sender, Message m, String user) throws RemoteException {
+		validateSession(sender);
 		if (sessionIDs.get(sender).equals(user)) {
 			throw new ServerException("Sending message to self.");
 		}
@@ -168,6 +182,7 @@ public class ChatServer implements ChatServerInterface {
 	}
 	
 	public void sendGroupMessage(int sender, Message m, String gname) throws RemoteException {
+		validateSession(sender);
 		Group g = this.groups.get(gname);
 		if(g != null) {
 			for(String user : g.members) {
@@ -186,8 +201,10 @@ public class ChatServer implements ChatServerInterface {
 	 * @param sessionID ensures that only a particular user can get their undelivered messages
 	 * 
 	 * @return list of messages
+	 * @throws FailException 
 	 */
-	public List<Message> getUndelivered(int sessionID) {
+	public List<Message> getUndelivered(int sessionID) throws FailException {
+		validateSession(sessionID);
 		String username = sessionIDs.get(sessionID);
 		if (this.undelivered.containsKey(username)) {
 			List<Message> undelivered = this.undelivered.get(username);
@@ -199,11 +216,13 @@ public class ChatServer implements ChatServerInterface {
 	}
 
 
-	public List<String> listGroups() {
+	public List<String> listGroups(int sender) throws FailException {
+		validateSession(sender);
 		return new ArrayList<String>(groups.keySet());
 	}
 
-	public List<String> listGroups(String pattern) {
+	public List<String> listGroups(int sender, String pattern) throws FailException {
+		validateSession(sender);
 		ArrayList<String> groups = new ArrayList<String>();
 		for(String g : this.groups.keySet()) {
 			if(g.matches(pattern)) {

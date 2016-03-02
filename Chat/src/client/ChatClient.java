@@ -9,6 +9,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
+import common.FailException;
 import common.Message;
 import server.ChatServerInterface;
 
@@ -62,9 +63,9 @@ public class ChatClient implements ChatClientInterface {
 			String pattern = scanner.nextLine();
 			List<String> accts;
 			if(pattern.length() > 0) {
-				accts = serverStub.listAccounts(pattern);
+				accts = serverStub.listAccounts(this.sessionID, pattern);
 			} else {
-				accts = serverStub.listAccounts();
+				accts = serverStub.listAccounts(this.sessionID);
 			}
 			System.out.println("Here are all the accounts you requested:");
 			for(String acct : accts) {
@@ -78,9 +79,9 @@ public class ChatClient implements ChatClientInterface {
 			String pattern = scanner.nextLine();
 			List<String> groups;
 			if(pattern.length() > 0) {
-				groups = serverStub.listGroups(pattern);
+				groups = serverStub.listGroups(this.sessionID, pattern);
 			} else {
-				groups = serverStub.listGroups();
+				groups = serverStub.listGroups(this.sessionID);
 			}
 			System.out.println("Here are all the groups you requested:");
 			for(String group : groups) {
@@ -112,7 +113,7 @@ public class ChatClient implements ChatClientInterface {
 		case "CG": {
 			printPrompt("Group Name:");
 			String gname = scanner.nextLine();
-			serverStub.newGroup(gname);
+			serverStub.newGroup(this.sessionID, gname);
 			return true;
 		}
 		case "AG": {
@@ -122,7 +123,7 @@ public class ChatClient implements ChatClientInterface {
 			String usernamesString = scanner.nextLine();
 			String[] usernames = usernamesString.split(",");
 			for(String username : usernames) {
-				serverStub.addMember(gname, username);
+				serverStub.addMember(this.sessionID, gname, username);
 			}
 			return true;
 		}
@@ -169,6 +170,9 @@ public class ChatClient implements ChatClientInterface {
 				keepGoing = loopOnce(serverStub);
 			} catch(ServerException e) {
 				printError(e.getLocalizedMessage());
+			} catch(FailException e) {
+				printError(e.getLocalizedMessage());
+				return 1;
 			} catch (RemoteException e) {
 				printError("Remote exception. Unable to contact server. Restart and try again");
 				return 1;
@@ -240,7 +244,9 @@ public class ChatClient implements ChatClientInterface {
 	}
 	
 	public void signOut(String message) {
+		System.out.println();
 		System.out.println(message);
+		System.exit(0);
 	}
 	
 	public static void main(String[] args) {
