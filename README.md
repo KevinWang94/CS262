@@ -1,1 +1,1 @@
-# CS262
+# CS262To run: 1. cd Chat2. javac src/*/*.java3. cd src4. rmiregistry &5. java server.ChatServer &6. On any machine, java client.ChatClient <server_ip> <machine_ip>
