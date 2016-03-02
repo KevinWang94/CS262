@@ -19,7 +19,6 @@ public class ChatServer implements ChatServerInterface {
 	private Map<Integer, String> sessionIDs;
 	private Map<String, Group> groups;
 	private Map<String, String> hosts;
-//	private Map<String, ChatClientInterface> activeUsers;
 	private Map<String, List<Message>> undelivered;
 
 	/**
