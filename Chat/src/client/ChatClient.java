@@ -17,9 +17,11 @@ public class ChatClient implements ChatClientInterface {
 	private Scanner scanner;
 	private int sessionID;
 	private String username;
-
-	public ChatClient() {
-		this.scanner = new Scanner(System.in);		
+	private String host;
+	
+	public ChatClient(String host) {
+		this.scanner = new Scanner(System.in);	
+		this.host = host;
 	}
 	
 	public String getName() throws RemoteException {
@@ -106,9 +108,11 @@ public class ChatClient implements ChatClientInterface {
 		}
 		case "D": {
 			List<Message> messages = serverStub.getUndelivered(this.sessionID);
-			for(Message m : messages) {
-				System.out.println("Blah");
-				System.out.println(m.getText());
+			if (messages != null) {
+				for(Message m : messages) {
+					System.out.println("Blah");
+					System.out.println(m.getText());
+				}
 			}
 			return true;
 		}
@@ -133,11 +137,21 @@ public class ChatClient implements ChatClientInterface {
 		}
 	}
 
-	private void loop(ChatServerInterface serverStub) {
+	private void loop() {
 		boolean keepGoing = true;
 		while(keepGoing) {
 			try {
-				keepGoing = loopOnce(serverStub);
+				Registry registry = LocateRegistry.getRegistry(this.host);
+				System.out.println("located");
+				ChatServerInterface serverStub;
+				try {
+					serverStub = (ChatServerInterface) registry.lookup("Server");
+					keepGoing = loopOnce(serverStub);
+				} catch (NotBoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			} catch (RemoteException e) {
 				System.out.println("Remote exception. Unable to contact server. Restart and try again");
 			}
@@ -145,7 +159,7 @@ public class ChatClient implements ChatClientInterface {
 	}
 
 	
-	private void initial(ChatServerInterface serverStub, String clientHost) throws RemoteException {
+	private void initial(String clientHost) throws RemoteException {
 		System.out.println("Type N for new account or L for login");
 		String input = scanner.nextLine();
 		switch(input) {
@@ -154,16 +168,26 @@ public class ChatClient implements ChatClientInterface {
 			String username = scanner.nextLine();
 			System.out.println("New password:");
 			String password = scanner.nextLine();
+			Registry registry = LocateRegistry.getRegistry(this.host);
+			System.out.println("located");
+			ChatServerInterface serverStub = null;
+			try {
+				serverStub = (ChatServerInterface) registry.lookup("Server");
+			} catch (NotBoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			int sessionID = serverStub.createAccount(username, password, clientHost);
 			if(sessionID > 0) {
 				this.username = username;
 				this.sessionID = sessionID;
 				ChatClientInterface clientStub = (ChatClientInterface) UnicastRemoteObject.exportObject(this, 0);
-				Registry registry = LocateRegistry.getRegistry();
-				registry.rebind(username, clientStub);
+				Registry clientRegistry = LocateRegistry.getRegistry();
+				clientRegistry.rebind(username, clientStub);
 			} else {
 				System.out.println("Username is already taken, please try again");
-				initial(serverStub, clientHost);
+				initial(clientHost);
 			}
 			break;
 		}
@@ -172,16 +196,26 @@ public class ChatClient implements ChatClientInterface {
 			String username = scanner.nextLine();
 			System.out.println("Password:");
 			String password = scanner.nextLine();
+			Registry registry = LocateRegistry.getRegistry(this.host);
+			System.out.println("located");
+			ChatServerInterface serverStub = null;
+			try {
+				serverStub = (ChatServerInterface) registry.lookup("Server");
+			} catch (NotBoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			int sessionID = serverStub.signIn(username, password, clientHost);
 			if(sessionID > 0) {
 				this.sessionID = sessionID;
 				this.username = username;
 				ChatClientInterface clientStub = (ChatClientInterface) UnicastRemoteObject.exportObject(this, 0);
-				Registry registry = LocateRegistry.getRegistry();
-				registry.rebind(username, clientStub);
+				Registry clientRegistry = LocateRegistry.getRegistry();
+				clientRegistry.rebind(username, clientStub);
 			} else {
 				System.out.println("Issue signing in, please try again");
-				initial(serverStub, clientHost);
+				initial(clientHost);
 			}
 			break;
 		}
@@ -204,9 +238,9 @@ public class ChatClient implements ChatClientInterface {
 			System.out.println("located");
 			ChatServerInterface serverStub = (ChatServerInterface) registry.lookup("Server");
 			System.out.println("stub");
-			ChatClient client = new ChatClient();
-			client.initial(serverStub, args[1]);
-			client.loop(serverStub);
+			ChatClient client = new ChatClient(args[0]);
+			client.initial(args[1]);
+			client.loop();
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
