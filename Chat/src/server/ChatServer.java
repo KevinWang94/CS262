@@ -121,15 +121,15 @@ public class ChatServer implements ChatServerInterface {
 		this.groups.put(gname, g);
 	}
 
-	public void addMember(String gname, String user) {
+	public void addMember(String gname, String user) throws ServerException {
 		if(this.groups.containsKey(gname)) {
 			if(this.users.containsKey(user)) {
 				this.groups.get(gname).addMember(user);
 			} else {
-				
+				throw new ServerException("User does not exist.");
 			}
 		} else {
-
+			throw new ServerException("Group does not exist.");
 		}
 
 	}

@@ -47,7 +47,7 @@ public class ChatClient implements ChatClientInterface {
 	}
 	
 	/**
-	 * Once through the CMI loop
+	 * Once through the CLI loop
 	 * 
 	 * @param serverStub
 	 * @return
