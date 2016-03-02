@@ -18,6 +18,10 @@ public class Message implements Serializable {
 		return text;
 	}
 	
+	public String getSender() {
+		return this.sender;
+	}
+	
 	public String getGroup() {
 		return group;
 	}

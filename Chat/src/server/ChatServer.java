@@ -44,14 +44,12 @@ public class ChatServer implements ChatServerInterface {
      */
 	public int createAccount(String username,
 			String password, String host) {
-		System.out.println("creating" + username);
 		if (users.containsKey(username)) {
 			return -1;
 		}
 		Account newAcct = new Account(username, password);
 		this.users.put(username, newAcct);
 		this.hosts.put(username, host);
-		System.out.println("created" + username);
 		return signIn(username, password, host);
 	}
 
@@ -144,12 +142,10 @@ public class ChatServer implements ChatServerInterface {
 		}
 
 		String host = hosts.get(user);
-		System.out.println(host);
 		try {
 			Registry registry = LocateRegistry.getRegistry(host);
 			ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(user);
 			clientStub.send(m);
-			System.out.println("sent");
 		} catch (RemoteException e) {
 			System.out.println("Remote exception trying to send message to: " + user);
 			if(this.undelivered.get(user) != null) {
@@ -245,11 +241,5 @@ public class ChatServer implements ChatServerInterface {
 			System.err.println("Server exception: " + e.toString());
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public String sayHello() {
-		// TODO Auto-generated method stub
-		return "Hello, world!";
 	}
 }
