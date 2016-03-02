@@ -72,7 +72,6 @@ public class ChatServer implements ChatServerInterface {
 		} while (sessionIDs.containsKey(sessionID));
 
 		// Register this SessionID
-		
 		if (this.hosts.containsKey(username)) {
 			Registry registry;
 			try {
@@ -80,9 +79,8 @@ public class ChatServer implements ChatServerInterface {
 				ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(username);
 				clientStub.signOut("This account has signed in on another machine.");	
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
+				System.out.println("Error signing out duplicate account, problems may ensue");
 			} catch (NotBoundException e) {
-				// TODO Auto-generated catch block
 			}
 		}
 		
@@ -119,16 +117,18 @@ public class ChatServer implements ChatServerInterface {
 		return accts;
 	}
 
-
 	public void newGroup(String gname) {
 		Group g = new Group(gname);
 		this.groups.put(gname, g);
 	}
 
 	public void addMember(String gname, String user) {
-		if (this.groups.containsKey(gname)) {
-			// TODO: what if the user doesn't exist?
-			this.groups.get(gname).addMember(user);
+		if(this.groups.containsKey(gname)) {
+			if(this.users.containsKey(user)) {
+				this.groups.get(gname).addMember(user);
+			} else {
+				
+			}
 		} else {
 
 		}
@@ -161,13 +161,10 @@ public class ChatServer implements ChatServerInterface {
 				this.undelivered.put(user, messages);
 			} else {
 				this.undelivered.get(user).add(m);
-			}
-			
+			}	
 		}
-
 	}
 	
-	@Override
 	public void sendGroupMessage(int sender, Message m, String gname) throws RemoteException {
 		Group g = this.groups.get(gname);
 		if(g != null) {
@@ -199,18 +196,6 @@ public class ChatServer implements ChatServerInterface {
 	}
 
 
-	@Override
-	public List<String> listActiveAccounts() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<String> listActiveAccounts(String pattern) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public List<String> listGroups() {
 		return new ArrayList<String>(groups.keySet());
 	}
@@ -224,8 +209,7 @@ public class ChatServer implements ChatServerInterface {
 		}
 		return groups;
 	}
-	
-	
+		
 	public static void main(String args[]) {
 		try {
 			ChatServer obj = new ChatServer();

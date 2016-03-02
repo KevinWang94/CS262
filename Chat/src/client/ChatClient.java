@@ -1,7 +1,6 @@
 package client;
 
 import java.util.List;
-import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -18,14 +17,39 @@ public class ChatClient implements ChatClientInterface {
 	private int sessionID;
 	private String username;
 	
+	/**
+	 * Basic constructor
+	 */
 	public ChatClient() {
 		this.scanner = new Scanner(System.in);
 	}
-	
-	public void send(Message msg) throws RemoteException {
-		System.out.println(msg.getSender() + ": " + msg.getText());
+		
+	private String stringOfMessage(Message msg) {
+		String out = "Message from " + msg.getSender();
+		if(msg.getGroup() != null) {
+			out += " to " + msg.getGroup();
+		}
+		out += ": ";
+		out += msg.getText();
+		return out;
 	}
 	
+	/**
+	 * Called by the server to send a message to this client
+	 * 
+	 * @param msg the message to be send
+	 */
+	public void send(Message msg) throws RemoteException {
+		System.out.println(stringOfMessage(msg));
+	}
+	
+	/**
+	 * Once through the CMI loop
+	 * 
+	 * @param serverStub
+	 * @return
+	 * @throws RemoteException
+	 */
 	private boolean loopOnce(ChatServerInterface serverStub) throws RemoteException {
 		System.out.println("Which command? Enter 'help' for command list, 'q' to Quit");
 		String input = scanner.nextLine();
@@ -43,6 +67,7 @@ public class ChatClient implements ChatClientInterface {
 			for(String acct : accts) {
 				System.out.println(acct);
 			}
+			System.out.println("Accounts done!");
 			return true;
 		}
 		case "LG": {
@@ -58,6 +83,7 @@ public class ChatClient implements ChatClientInterface {
 			for(String group : groups) {
 				System.out.println(group);
 			}
+			System.out.println("Groups done!");
 			return true;
 		}
 		case "SM": {
@@ -89,7 +115,7 @@ public class ChatClient implements ChatClientInterface {
 		case "AG": {
 			System.out.println("Group Name:");
 			String gname = scanner.nextLine();
-			System.out.println("Comma separated usernames");
+			System.out.println("Comma separated usernames (no spaces)");
 			String usernamesString = scanner.nextLine();
 			String[] usernames = usernamesString.split(",");
 			for(String username : usernames) {
@@ -99,12 +125,13 @@ public class ChatClient implements ChatClientInterface {
 		}
 		case "D": {
 			List<Message> messages = serverStub.getUndelivered(this.sessionID);
+			System.out.println("Here are your undelievered messages:");
 			if (messages != null) {
 				for(Message m : messages) {
-					System.out.println("Blah");
-					System.out.println(m.getText());
+					System.out.println(stringOfMessage(m));
 				}
 			}
+			System.out.println("Messages done!");
 			return true;
 		}
 		case "DA": {
@@ -112,10 +139,11 @@ public class ChatClient implements ChatClientInterface {
 			this.sessionID = -1;
 			this.username = null;
 			System.out.println("Your account has been deleted");
-			return true;
+			return false;
 		}
 		case "help": {
-			System.out.println("HELP TEXT HERE");
+			System.out.println("LA for list accounts, LG for list groups, SM for send message");
+			System.out.println("CG for create group, AG to add to group, D for undelivered, DA for delete acct");
 			return true;
 		}
 		case "q": {
@@ -128,6 +156,9 @@ public class ChatClient implements ChatClientInterface {
 		}
 	}
 
+	/**
+	 * CLI loop
+	 */
 	private int loop(ChatServerInterface serverStub) {
 		boolean keepGoing = true;
 		while(keepGoing) {
@@ -140,8 +171,12 @@ public class ChatClient implements ChatClientInterface {
 		}
 		return 0;
 	}
-
 	
+	/**
+	 * Initialization, either logging in or creating account
+	 * @param clientHost
+	 * @throws RemoteException
+	 */
 	private void initial(ChatServerInterface serverStub, String clientHost) throws RemoteException {
 		System.out.println("Type N for new account or L for login");
 		String input = scanner.nextLine();
@@ -187,12 +222,12 @@ public class ChatClient implements ChatClientInterface {
 		default:
 			System.out.println("Invalid choice please try again");
 		}
-
 	}
 	
 	public void signOut(String message) {
 		System.out.println(message);
 	}
+	
 	public static void main(String[] args) {
 		String serverHost = args[0];
 		String clientHost = args[1];
