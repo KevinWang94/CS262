@@ -44,12 +44,14 @@ public class ChatServer implements ChatServerInterface {
      */
 	public int createAccount(String username,
 			String password, String host) {
+		System.out.println("creating" + username);
 		if (users.containsKey(username)) {
 			return -1;
 		}
 		Account newAcct = new Account(username, password);
 		this.users.put(username, newAcct);
 		this.hosts.put(username, host);
+		System.out.println("created" + username);
 		return signIn(username, password, host);
 	}
 
@@ -77,7 +79,7 @@ public class ChatServer implements ChatServerInterface {
 		if (this.hosts.containsKey(username)) {
 			Registry registry;
 			try {
-				registry = LocateRegistry.getRegistry();
+				registry = LocateRegistry.getRegistry(this.hosts.get(username));
 				ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(username);
 				clientStub.signOut("This account has signed in on another machine.");	
 			} catch (RemoteException e) {
@@ -141,12 +143,15 @@ public class ChatServer implements ChatServerInterface {
 			throw new RemoteException("User does not exist.");
 		}
 
+		String host = hosts.get(user);
+		System.out.println(host);
 		try {
-			Registry registry = LocateRegistry.getRegistry();
+			Registry registry = LocateRegistry.getRegistry(host);
 			ChatClientInterface clientStub = (ChatClientInterface) registry.lookup(user);
 			clientStub.send(m);
+			System.out.println("sent");
 		} catch (RemoteException e) {
-			System.out.println("Remove exception trying to send message to: " + user);
+			System.out.println("Remote exception trying to send message to: " + user);
 			if(this.undelivered.get(user) != null) {
 				this.undelivered.get(user).add(m);
 			} else {

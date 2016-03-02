@@ -201,7 +201,9 @@ public class ChatClient implements ChatClientInterface {
 		// args[2] = hostname of self
 		try {
 			Registry registry = LocateRegistry.getRegistry(args[0]);
+			System.out.println("located");
 			ChatServerInterface serverStub = (ChatServerInterface) registry.lookup("Server");
+			System.out.println("stub");
 			ChatClient client = new ChatClient();
 			client.initial(serverStub, args[1]);
 			client.loop(serverStub);
