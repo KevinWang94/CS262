@@ -1,7 +1,6 @@
 package client;
 
 import java.util.List;
-import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -19,22 +18,47 @@ public class ChatClient implements ChatClientInterface {
 	private String username;
 	private String host;
 	
+	/**
+	 * Basic constructor
+	 * 
+	 * @param host the host IP address
+	 */
 	public ChatClient(String host) {
 		this.scanner = new Scanner(System.in);	
 		this.host = host;
 	}
 	
 	public String getName() throws RemoteException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	private String stringOfMessage(Message msg) {
+		String out = "Message from " + msg.getSender();
+		if(msg.getGroup() != null) {
+			out += " to " + msg.getGroup();
+		}
+		out += ": ";
+		out += msg.getText();
+		return out;
+	}
+	
+	/**
+	 * Called by the server to send a message to this client
+	 * 
+	 * @param msg the message to be send
+	 */
 	public void send(Message msg) throws RemoteException {
-		System.out.println(msg.getText());
-		// TODO Auto-generated method stub
+		System.out.println(stringOfMessage(msg));
 
 	}
 	
+	/**
+	 * Once through the CMI loop
+	 * 
+	 * @param serverStub
+	 * @return
+	 * @throws RemoteException
+	 */
 	private boolean loopOnce(ChatServerInterface serverStub) throws RemoteException {
 		System.out.println("Which command? Enter 'help' for command list, 'q' to Quit");
 		String input = scanner.nextLine();
@@ -52,6 +76,7 @@ public class ChatClient implements ChatClientInterface {
 			for(String acct : accts) {
 				System.out.println(acct);
 			}
+			System.out.println("Accounts done!");
 			return true;
 		}
 		case "LG": {
@@ -67,6 +92,7 @@ public class ChatClient implements ChatClientInterface {
 			for(String group : groups) {
 				System.out.println(group);
 			}
+			System.out.println("Groups done!");
 			return true;
 		}
 		case "SM": {
@@ -98,7 +124,7 @@ public class ChatClient implements ChatClientInterface {
 		case "AG": {
 			System.out.println("Group Name:");
 			String gname = scanner.nextLine();
-			System.out.println("Comma separated usernames");
+			System.out.println("Comma separated usernames (no spaces)");
 			String usernamesString = scanner.nextLine();
 			String[] usernames = usernamesString.split(",");
 			for(String username : usernames) {
@@ -108,12 +134,13 @@ public class ChatClient implements ChatClientInterface {
 		}
 		case "D": {
 			List<Message> messages = serverStub.getUndelivered(this.sessionID);
+			System.out.println("Here are your undelievered messages:");
 			if (messages != null) {
 				for(Message m : messages) {
-					System.out.println("Blah");
-					System.out.println(m.getText());
+					System.out.println(stringOfMessage(m));
 				}
 			}
+			System.out.println("Messages done!");
 			return true;
 		}
 		case "DA": {
@@ -121,10 +148,11 @@ public class ChatClient implements ChatClientInterface {
 			this.sessionID = -1;
 			this.username = null;
 			System.out.println("Your account has been deleted");
-			return true;
+			return false;
 		}
 		case "help": {
-			System.out.println("HELP TEXT HERE");
+			System.out.println("LA for list accounts, LG for list groups, SM for send message");
+			System.out.println("CG for create group, AG to add to group, D for undelivered, DA for delete acct");
 			return true;
 		}
 		case "q": {
@@ -137,6 +165,9 @@ public class ChatClient implements ChatClientInterface {
 		}
 	}
 
+	/**
+	 * CMI loop
+	 */
 	private void loop() {
 		boolean keepGoing = true;
 		while(keepGoing) {
@@ -144,6 +175,7 @@ public class ChatClient implements ChatClientInterface {
 				Registry registry = LocateRegistry.getRegistry(this.host);
 				System.out.println("located");
 				ChatServerInterface serverStub;
+				// TODO: run experiments without this?
 				try {
 					serverStub = (ChatServerInterface) registry.lookup("Server");
 					keepGoing = loopOnce(serverStub);
@@ -153,13 +185,25 @@ public class ChatClient implements ChatClientInterface {
 				}
 
 			} catch (RemoteException e) {
-				System.out.println("Remote exception. Unable to contact server. Restart and try again");
+				System.out.println("Remote exception. Unable to contact server. Try restarting? :P");
 			}
 		}
 	}
-
 	
+	/**
+	 * Initialization, either logging in or creating account
+	 * @param clientHost
+	 * @throws RemoteException
+	 */
 	private void initial(String clientHost) throws RemoteException {
+		ChatServerInterface serverStub = null;
+		Registry registry = LocateRegistry.getRegistry(this.host);
+		try {
+			serverStub = (ChatServerInterface) registry.lookup("Server");
+		} catch (NotBoundException e) {
+			// todo
+		}
+		
 		System.out.println("Type N for new account or L for login");
 		String input = scanner.nextLine();
 		switch(input) {
@@ -168,15 +212,7 @@ public class ChatClient implements ChatClientInterface {
 			String username = scanner.nextLine();
 			System.out.println("New password:");
 			String password = scanner.nextLine();
-			Registry registry = LocateRegistry.getRegistry(this.host);
 			System.out.println("located");
-			ChatServerInterface serverStub = null;
-			try {
-				serverStub = (ChatServerInterface) registry.lookup("Server");
-			} catch (NotBoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 
 			int sessionID = serverStub.createAccount(username, password, clientHost);
 			if(sessionID > 0) {
@@ -196,15 +232,6 @@ public class ChatClient implements ChatClientInterface {
 			String username = scanner.nextLine();
 			System.out.println("Password:");
 			String password = scanner.nextLine();
-			Registry registry = LocateRegistry.getRegistry(this.host);
-			System.out.println("located");
-			ChatServerInterface serverStub = null;
-			try {
-				serverStub = (ChatServerInterface) registry.lookup("Server");
-			} catch (NotBoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 
 			int sessionID = serverStub.signIn(username, password, clientHost);
 			if(sessionID > 0) {
@@ -222,17 +249,17 @@ public class ChatClient implements ChatClientInterface {
 		default:
 			System.out.println("Invalid choice please try again");
 		}
-
 	}
 	
 	public void signOut(String message) {
 		System.out.println(message);
 	}
+	
 	public static void main(String[] args) {
 		System.out.println(args[0]);
 		System.out.println(args[1]);
-		// args[1] = hostname of server
-		// args[2] = hostname of self
+		// args[0] = hostname of server
+		// args[1] = hostname of self
 		try {
 			Registry registry = LocateRegistry.getRegistry(args[0]);
 			System.out.println("located");
@@ -248,17 +275,5 @@ public class ChatClient implements ChatClientInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-//		try {
-//
-//			String host = (args.length < 1) ? null : args[0];
-//
-//			int response = serverStub.createAccount(client, username, password);
-//			serverStub.sendMessage(response, new Message("", "hi"), "test");
-//			System.out.println("response: " + response);
-//		} catch (Exception e) {
-//			System.err.println("Client exception: " + e.toString());
-//			e.printStackTrace();
-//		}
 	}
 }

@@ -22,6 +22,10 @@ public class Message implements Serializable {
 		return group;
 	}
 	
+	public String getSender() {
+		return sender;
+	}
+	
 	public void setGroup(String group) {
 		this.group = group;
 	}
