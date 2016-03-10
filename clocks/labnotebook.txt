@@ -1,0 +1,40 @@
+CS262 Scale Models and Logical Clocks
+3/10/2016
+Lucy Cheng and Kevin Wang
+
+3/7/2016:
+-Reviewed the Lamport paper to remind ourselves about logical clocks
+-Hear in class that using global variables does not respect the spec
+
+3/8/2016:
+-First idea: use the Python multiprocessing library! It allows spinning up
+separate processes and takes care of setting up pipes between them.
+-But how to deal with queue and virtual machine simulation in one process?
+The former is not rate limited while the latter is not. Ideally, this would
+be done with two threads in a single process, but that's not possible in Python
+-Heard from Ankit that Prof Waldo approved a simulation of two threads with one
+in Python.
+-What if the process does the following:
+      -Wake up, check the pipe and pull all messages (if there) onto a local
+       queue. Time how long this takes. 
+      -Then, run one tick of the virtual machine, checking the queue for
+       messages, sending messages, etc.
+      -Sleep for an amount of time, subtracting the amount of time it took to
+       pull things out of the pipes into the queue. This ensures that ticks
+       will still proceed every x seconds.
+
+3/9/2016:
+-Prof Waldo confirms that we should not have six processes, but only three.
+-New idea that's a bit less messy courtesy of conversations with Willy.
+Each process does the following
+     -Wake up, block on the queue and wait for messages. If one is received,
+      add it to the local queue. Continue blocking until the requisite number
+      of seconds have been spent.
+     -Run one tick of the virtual machine, as above.
+     -Repeat.
+     -This requires the use of Queues from python's multiprocessing library,
+      instead of pipes, as we want to be able to read from one place. And
+      the latter may become corrupted if two processes write to it at the same
+      time.
+-Implement the above! Relatively straightforward actually, especially with the
+help of the multiprocess library.
