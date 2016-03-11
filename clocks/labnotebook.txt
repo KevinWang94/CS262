@@ -93,4 +93,15 @@ Fourth Run: 0.16 sec, 1 sec, 0.2 sec
        logical clock drifted significantly. By the end, the other two processes
        clocks were at 447/448, while it was still at 240.
 
-Fifth Run: 
+Fifth Run: 1 sec, 0.25 sec, 0.33 sec
+       The slow ticking process here did slightly "better" here in that it was
+       able to have a few internal events and one send, but then it became
+       overwhelmed by the size of its queue and had to only receive messages.
+       Upon each message, the logical clock generally ticked up, but usually
+       by something like two or three, so not as high as in previous runs.
+       Again, the two faster running processes stayed relatively in sync,
+       and all managed their queues without a problem. Whereas the slow
+       ticking process had its queue backed up, ending with 14 items.
+       Unsurprisingly, this again caused some logical clock drift, with the
+       two faster processes ending at 306/307 logical clock values, whereas
+       the slow ticking process was at 249.
