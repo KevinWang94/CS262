@@ -23,6 +23,7 @@ def f(own, first, second, outfile):
     with open(outfile, 'w') as f:
         # loop
         while(True):
+            f.write(str(tick_interval) + "\n")
             # block for tick interval amount of time overall
             time_left = tick_interval
             while(time_left > 0):
@@ -57,7 +58,7 @@ def f(own, first, second, outfile):
                             + "with remaining queue size: " + str(len(q))
             to_print += " at logical time: " + str(logical_clock) + " and system time " \
                         + str(datetime.now())
-            print(to_print)
+            f.write(to_print + "\n")
 
 def main():
     first = ("p1", multiprocessing.Queue())

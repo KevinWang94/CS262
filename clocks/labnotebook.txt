@@ -38,3 +38,59 @@ Each process does the following
       time.
 -Implement the above! Relatively straightforward actually, especially with the
 help of the multiprocess library.
+
+3/10/2016:
+
+Results of the 5 runs. Tick intervals of each process given
+
+First Run: 1 sec, 0.2 sec, 0.2 sec
+      In this case, the two fast running processes ticked almost completely in sync
+      with their logical clocks. In that they basically only received messages
+      from one another and given their identical tick speed and such, rarely
+      passed messages that caused major clock updates (deviation by more than 1
+      was rare). In addition, the queue was almost empty, rarely having size 1
+
+      In contrast, the slow ticking process always had messages in its queue,
+      and was never able to have internal events or send events because it always
+      had to deal with its queue given the number of messages it was receiving from
+      the other processes. Upon every message, its logical clock was jump forward
+      significantly, usually by several increments, but sometimes more than 10.
+      Also, the queue size continued to grow over the course of the
+      minute, ending with 29 messages to process. This resulted in somewhat
+      significant drift, as it was always behind on messages and therefore
+      logical clock values.
+
+Second Run: 0.16 sec, 0.2 sec, 0.2 sec
+       Here all the processes were relatively fast-ticking. As expected, the
+       fastest ticking process largely set the logical clock pace for the system.
+       But in this case, the difference between the tick speeds was such that
+       there was still a healthy amount of messages going on between all processes.
+       As such, there weren't many big jumps in logical clocks or drifts between
+       logical clocks across the processes.
+
+Third Run: 0.16 sec, 0.33 sec, 0.16 sec
+      This run looked similar to the first one, but less extreme. The two fast
+      ticking processes again were almost always in sync, with logical clocks
+      that rarely deviated from another. And as expected, they rarely had a queue
+      with any messages to be dealt with after the received one. Meanwhile, the
+      slow-ticking queue did have significantly more receives to deal with, and
+      was having its logical clock pace incremented and set by those receives.
+      But, the queue never got extremely large, and in fact fell back to 0 by the
+      end of the minute. In addition, this process was still able to send
+      messages with some frequency. Again, there was little drift between the
+      logical clocks observed here.
+
+Fourth Run: 0.16 sec, 1 sec, 0.2 sec
+       The slow ticking process here resembled the slow ticking one from
+       the First Run. It was never able to have internal events or send messages
+       because it always had a received message to deal with. The queue by the end
+       had grown to 59! The other two fast-ticking processes kept up with each other
+       quite well. Even the slower ticking of the two never had extra messages
+       in its queue. And as observed in the first run, their logical clocks
+       almost proceeded entirely in sync.
+
+       Meanwhile, due to the immense queue back-up of the first process, its
+       logical clock drifted significantly. By the end, the other two processes
+       clocks were at 447/448, while it was still at 240.
+
+Fifth Run: 
