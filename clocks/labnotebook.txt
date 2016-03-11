@@ -94,3 +94,16 @@ Fourth Run: 0.16 sec, 1 sec, 0.2 sec
        clocks were at 447/448, while it was still at 240.
 
 Fifth Run: 
+
+Running with Less Variation:
+       We changed the tick rate to be between 6 and 10 per second, to reduce
+       the variation.
+       Run with 0.16 sec, 0.11 sec, 0.10 sec had less logical drift, and
+       low queue sizes since even the slowest was not significantly slower than
+       the fastest, so messages never get a chance to build up.
+
+Running with Fewer Internal Events:
+       With fewer internal events, the slowest process had a longer queue, since
+       the other processes sent messages more often. With 0.2, 0.25, 0.5, the 
+       process with 0.5 ended with 48 messages in its queue and logical clock
+       of 226 while the other two were at 313 and 315.

@@ -37,11 +37,11 @@ def f(own, first, second, outfile):
                     break
             to_print = ""
             if(len(q) == 0):
-                randgen = random.randint(1, 10)
+                randgen = random.randint(1, 5)
                 logical_clock += 1
                 if randgen == 1:
                     tofirst.put((ownname, logical_clock))
-                    to_print += ("Sent message to: " + firstname)                    
+                    to_print += ("Sent message to: " + firstname)
                 elif randgen == 2:
                     tosecond.put((ownname, logical_clock))
                     to_print += ("Sent message to: " + secondname)
@@ -64,7 +64,7 @@ def main():
     first = ("p1", multiprocessing.Queue())
     second = ("p2", multiprocessing.Queue())
     third = ("p3", multiprocessing.Queue())
-    
+
     p1 = Process(target = f, args = (first, second, third, "p1.txt"))
     p2 = Process(target = f, args = (second, third, first, "p2.txt"))
     p3 = Process(target = f, args = (third, first, second, "p3.txt"))
