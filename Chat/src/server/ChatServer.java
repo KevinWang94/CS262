@@ -15,10 +15,29 @@ import common.*;
 
 public class ChatServer implements ChatServerInterface {
 
+	/**
+	 * All 
+	 */
 	private Map<String, Account> users;
+	
+	/**
+	 * 
+	 */
 	private Map<Integer, String> sessionIDs;
+	
+	/**
+	 * 
+	 */
 	private Map<String, Group> groups;
+	
+	/**
+	 * 
+	 */
 	private Map<String, String> hosts;
+	
+	/**
+	 * Messages that have yet to be delivered
+	 */
 	private Map<String, List<Message>> undelivered;
 
 	/**
@@ -38,16 +57,6 @@ public class ChatServer implements ChatServerInterface {
 		}
 	}
 	
-
-    /**
-     * Create an account
-     * 
-     * @param client: the client being used to create this account
-     * @param username
-     * @param password
-     * 
-     * @return SessionID integer, -1 if username already exists
-     */
 	public int createAccount(String username,
 			String password, String host) {
 		if (users.containsKey(username)) {
@@ -59,14 +68,6 @@ public class ChatServer implements ChatServerInterface {
 		return signIn(username, password, host);
 	}
 
-	/**
-	 * Sign in to the chat server
-	 * 
-	 * @param username
-	 * @param password
-	 * 
-	 * @return SessionID integer, -1 if account doesn't exist or password is not correct
-	 */
 	public int signIn(String username, String password, String host) {
 		Account acct = users.get(username);
 		if (acct == null || !acct.password.equals(password)) {
@@ -97,12 +98,6 @@ public class ChatServer implements ChatServerInterface {
 		return sessionID;
 	}
 	
-	/**
-	 * Delete an account while logged in
-	 * 
-	 * @param SessionID (this makes sure only you can delete your own account)
-	 * @throws FailException 
-	 */
 	public void deleteAccount(int sender) throws FailException {
 		validateSession(sender);
 		String username = this.sessionIDs.get(sender);
@@ -195,14 +190,6 @@ public class ChatServer implements ChatServerInterface {
 		
 	}
 	
-	/**
-	 * Get the undelivered messages for a user
-	 * 
-	 * @param sessionID ensures that only a particular user can get their undelivered messages
-	 * 
-	 * @return list of messages
-	 * @throws FailException 
-	 */
 	public List<Message> getUndelivered(int sessionID) throws FailException {
 		validateSession(sessionID);
 		String username = sessionIDs.get(sessionID);
