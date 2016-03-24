@@ -1,5 +1,8 @@
 package common;
 
+/**
+ * A simple message 
+ */
 import java.io.Serializable;
 
 public class Message implements Serializable {
