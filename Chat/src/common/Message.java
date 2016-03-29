@@ -1,7 +1,9 @@
 package common;
 
 /**
- * A simple message 
+ * This is the serializable message that gets passed between the server and
+ * client using RMI. It's pretty lightweight, having just a couple of simple
+ * fields.
  */
 import java.io.Serializable;
 
@@ -17,6 +19,7 @@ public class Message implements Serializable {
 	
 	/**
 	 * The name of the group if the message is being sent to a group.
+	 * If not being sent to a group, null
 	 */
 	String group;
 
@@ -34,7 +37,7 @@ public class Message implements Serializable {
 	/**
 	 * Gets the text of a message. 
 	 * 
-	 * @return
+	 * @return the text of a message
 	 */
 	public String getText() {
 		return text;
@@ -43,7 +46,7 @@ public class Message implements Serializable {
 	/** 
 	 * Gets the sender of a message.
 	 * 
-	 * @return
+	 * @return the sender of a message
 	 */
 	public String getSender() {
 		return this.sender;
