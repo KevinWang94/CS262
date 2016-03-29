@@ -4,6 +4,9 @@ import java.rmi.*;
 
 import common.Message;
 
+/**
+ * TODO
+ */
 public interface ChatClientInterface extends Remote {
 	
 	/**

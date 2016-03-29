@@ -13,6 +13,9 @@ import common.FailException;
 import common.Message;
 import server.ChatServerInterface;
 
+/**
+ * Chat client. Handles user input and interactions with the server.
+ */
 public class ChatClient implements ChatClientInterface {
 
 	/**
