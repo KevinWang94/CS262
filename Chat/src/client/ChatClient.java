@@ -14,7 +14,9 @@ import common.Message;
 import server.ChatServerInterface;
 
 /**
- * Chat client. Handles user input and interactions with the server.
+ * This is the implementation of the chat client. 
+ * It handles both user input through a CLI and setting up a connection
+ * with the server and interacting with it.
  */
 public class ChatClient implements ChatClientInterface {
 
@@ -76,11 +78,10 @@ public class ChatClient implements ChatClientInterface {
 	/**
 	 * Handles one iteration through the CLI loop.
 	 * Asks for a command, and handles it, throwing RemoteException
-	 * on failures. Returns false if the client should terminate,
-	 * and true otherwise. Terminate if user logged off.
+	 * on failures. Terminates if user logged off.
 	 * 
 	 * @param serverStub
-	 * @return
+	 * @return boolean indicating whether the client should continue
 	 * @throws RemoteException
 	 */
 	private boolean loopOnce(ChatServerInterface serverStub) throws RemoteException {
@@ -304,6 +305,10 @@ public class ChatClient implements ChatClientInterface {
 		System.exit(0);
 	}
 	
+	/**
+	 * Main method. Sets up the connection to the server and begins CLI loop.
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		String serverHost = args[0];
 		String clientHost = args[1];

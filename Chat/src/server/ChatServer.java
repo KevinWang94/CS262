@@ -52,8 +52,9 @@ public class ChatServer implements ChatServerInterface {
     }
 
     /**
+     * Validate a session given a sessionID
      * 
-     * @param sender
+     * @param sender's sessionID
      * @throws FailException
      */
 	public void validateSession(int sender) throws FailException {
@@ -62,6 +63,10 @@ public class ChatServer implements ChatServerInterface {
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#createAccount(java.lang.String, java.lang.String, java.lang.String)
+	 */
 	public int createAccount(String username,
 			String password, String host) {
 		if (users.containsKey(username)) {
@@ -73,6 +78,10 @@ public class ChatServer implements ChatServerInterface {
 		return signIn(username, password, host);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#signIn(java.lang.String, java.lang.String, java.lang.String)
+	 */
 	public int signIn(String username, String password, String host) {
 		Account acct = users.get(username);
 		if (acct == null || !acct.password.equals(password)) {
@@ -103,6 +112,10 @@ public class ChatServer implements ChatServerInterface {
 		return sessionID;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#deleteAccount(int)
+	 */
 	public void deleteAccount(int sender) throws FailException {
 		validateSession(sender);
 		String username = this.sessionIDs.get(sender);
@@ -111,11 +124,19 @@ public class ChatServer implements ChatServerInterface {
 		this.undelivered.remove(username);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#listAccounts(int)
+	 */
 	public List<String> listAccounts(int sender) throws FailException {
 		validateSession(sender);
 		return new ArrayList<String>(users.keySet());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#listAccounts(int, java.lang.String)
+	 */
 	public List<String> listAccounts(int sender, String pattern) throws FailException {
 		validateSession(sender);
 		ArrayList<String> accts = new ArrayList<String>();
@@ -127,12 +148,20 @@ public class ChatServer implements ChatServerInterface {
 		return accts;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#newGroup(int, java.lang.String)
+	 */
 	public void newGroup(int sender, String gname) throws FailException {
 		validateSession(sender);
 		Group g = new Group(gname);
 		this.groups.put(gname, g);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#addMember(int, java.lang.String, java.lang.String)
+	 */
 	public void addMember(int sender, String gname, String user) throws ServerException, FailException {
 		validateSession(sender);
 		if(this.groups.containsKey(gname)) {
@@ -147,6 +176,10 @@ public class ChatServer implements ChatServerInterface {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#sendMessage(int, common.Message, java.lang.String)
+	 */
 	public void sendMessage(int sender, Message m, String user) throws RemoteException {
 		validateSession(sender);
 		if (sessionIDs.get(sender).equals(user)) {
@@ -181,6 +214,10 @@ public class ChatServer implements ChatServerInterface {
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#sendGroupMessage(int, common.Message, java.lang.String)
+	 */
 	public void sendGroupMessage(int sender, Message m, String gname) throws RemoteException {
 		validateSession(sender);
 		Group g = this.groups.get(gname);
@@ -195,6 +232,10 @@ public class ChatServer implements ChatServerInterface {
 		
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#getUndelivered(int)
+	 */
 	public List<Message> getUndelivered(int sessionID) throws FailException {
 		validateSession(sessionID);
 		String username = sessionIDs.get(sessionID);
@@ -208,11 +249,19 @@ public class ChatServer implements ChatServerInterface {
 	}
 
 
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#listGroups(int)
+	 */
 	public List<String> listGroups(int sender) throws FailException {
 		validateSession(sender);
 		return new ArrayList<String>(groups.keySet());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see server.ChatServerInterface#listGroups(int, java.lang.String)
+	 */
 	public List<String> listGroups(int sender, String pattern) throws FailException {
 		validateSession(sender);
 		ArrayList<String> groups = new ArrayList<String>();
@@ -224,6 +273,10 @@ public class ChatServer implements ChatServerInterface {
 		return groups;
 	}
 		
+	/**
+	 * Main method. Exports the stub, binding it in the registry.
+	 * @param args
+	 */
 	public static void main(String args[]) {
 		try {
 			ChatServer obj = new ChatServer();

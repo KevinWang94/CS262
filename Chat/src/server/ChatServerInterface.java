@@ -6,6 +6,14 @@ import java.util.List;
 
 import common.*;
 
+/**
+ * This is the interface of the chat server used in RMI.
+ * Chat clients interact with this server through RMI calls. 
+ * Note that in our implementation, the server also connects to each 
+ * individual client to enable push notifications. 
+ * 
+ * @author kwang01
+ */
 public interface ChatServerInterface extends Remote {
     /**
      * Creates an account given 

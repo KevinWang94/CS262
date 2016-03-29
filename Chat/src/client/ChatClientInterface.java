@@ -5,7 +5,9 @@ import java.rmi.*;
 import common.Message;
 
 /**
- * TODO
+ * This is the interface of the chat client used for RMI (as clients
+ * are actually also servers in our implementation to allow push 
+ * notifications).
  */
 public interface ChatClientInterface extends Remote {
 	
