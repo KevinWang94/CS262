@@ -13,6 +13,11 @@ import common.FailException;
 import common.Message;
 import server.ChatServerInterface;
 
+/**
+ * Chat client. 
+ * @author Lucy
+ *
+ */
 public class ChatClient implements ChatClientInterface {
 
 	/**
