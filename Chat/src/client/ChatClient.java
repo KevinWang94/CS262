@@ -15,17 +15,39 @@ import server.ChatServerInterface;
 
 public class ChatClient implements ChatClientInterface {
 
+	/**
+	 * Scanner  to take user input.
+	 */
 	private Scanner scanner;
+	
+	/**
+	 * Session ID for this client. When contact with the 
+	 * server is first made, a session ID is assigned.
+	 * The client keeps the session ID and uses it to 
+	 * verify identity with the server for all future requests.
+	 */
 	private int sessionID;
+	
+	/**
+	 * Username of the account logged onto this client.
+	 */
 	private String username;
 	
 	/**
-	 * Basic constructor
+	 * Basic constructor. Creates scanner object. All
+	 * real initialization occurs on login.
 	 */
 	public ChatClient() {
 		this.scanner = new Scanner(System.in);
 	}
-		
+	
+	/**
+	 * Formatter for messages. Takes a received message object
+	 * and formats the string to display to the user.
+	 * 
+	 * @param msg: the received message
+	 * @return the formatted string
+	 */
 	private String stringOfMessage(Message msg) {
 		String out = "Message from " + msg.getSender();
 		if(msg.getGroup() != null) {
@@ -37,7 +59,8 @@ public class ChatClient implements ChatClientInterface {
 	}
 	
 	/**
-	 * Called by the server to send a message to this client
+	 * Function called by the server to send a message to this client
+	 * Handles the printing of the message on the client side.
 	 * 
 	 * @param msg the message to be send
 	 */
@@ -48,7 +71,10 @@ public class ChatClient implements ChatClientInterface {
 	}
 	
 	/**
-	 * Once through the CLI loop
+	 * Handles one iteration through the CLI loop.
+	 * Asks for a command, and handles it, throwing RemoteException
+	 * on failures. Returns false if the client should terminate,
+	 * and true otherwise. Terminate if user logged off.
 	 * 
 	 * @param serverStub
 	 * @return
@@ -161,7 +187,13 @@ public class ChatClient implements ChatClientInterface {
 	}
 
 	/**
-	 * CLI loop
+	 * The CLI loop. Calls loopOnce until error or log off,
+	 * as signaled by loopOnce. If an exception occurred, print
+	 * the error for the user. If a fatal error (FailException or
+	 * RemoteException), exit and return 1. 
+	 * 
+	 * @param serverStub: the stub of the chat server
+	 * @return 1 on fatal exceptions and 0 otherwise.
 	 */
 	private int loop(ChatServerInterface serverStub) {
 		boolean keepGoing = true;
@@ -181,18 +213,32 @@ public class ChatClient implements ChatClientInterface {
 		return 0;
 	}
 	
+	/** Prints the prompt for user input.
+	 * 
+	 * @param message: the specific prompt
+	 */
 	private void printPrompt(String message) {
 		System.out.println(message);
 		System.out.print(">");
 	}
 	
+	/**
+	 * Print an error.
+	 * 
+	 * @param message: the specific error
+	 */
 	private void printError(String message) {
 		System.out.println("Error: " + message);
 	}
 	
 	/**
-	 * Initialization, either logging in or creating account
-	 * @param clientHost
+	 * Initialization, either logging in or creating account.
+	 * Asks user whether they want to log in or create a new account.
+	 * Sends request to server, which either rejects log in or
+	 * returns a new session ID. Store the session ID, and register
+	 * a client stub to this machine's registry.
+	 * 
+	 * @param clientHost: ip of host for the client
 	 * @throws RemoteException
 	 */
 	private void initial(ChatServerInterface serverStub, String clientHost) throws RemoteException {
@@ -243,6 +289,12 @@ public class ChatClient implements ChatClientInterface {
 		}
 	}
 	
+	/**
+	 * Sign out. Can also be called by server to force a sign
+	 * out when this account is logged into from another machine.
+	 * 
+	 * @param message: message to print when signing out
+	 */
 	public void signOut(String message) {
 		System.out.println();
 		System.out.println(message);

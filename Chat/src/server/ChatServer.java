@@ -16,22 +16,22 @@ import common.*;
 public class ChatServer implements ChatServerInterface {
 
 	/**
-	 * All 
+	 * Map from username to account objects.
 	 */
 	private Map<String, Account> users;
 	
 	/**
-	 * 
+	 * Map from session ID to username.
 	 */
 	private Map<Integer, String> sessionIDs;
 	
 	/**
-	 * 
+	 * Map from group name to group objects.
 	 */
 	private Map<String, Group> groups;
 	
 	/**
-	 * 
+	 * Map from username to hosting server.
 	 */
 	private Map<String, String> hosts;
 	
@@ -51,6 +51,11 @@ public class ChatServer implements ChatServerInterface {
     	this.hosts = new HashMap<String, String>();
     }
 
+    /**
+     * 
+     * @param sender
+     * @throws FailException
+     */
 	public void validateSession(int sender) throws FailException {
 		if (!sessionIDs.containsKey(sender)) {
 			throw new FailException("Invalid session ID");
